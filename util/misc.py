@@ -438,7 +438,7 @@ def init_distributed_mode(args):
     else:
         print('Not using distributed mode')
         args.distributed = False
-        return
+        return  args.distributed
 
     args.distributed = True
  

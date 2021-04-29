@@ -152,6 +152,7 @@ def make_coco_transforms(image_set):
 
 def build(image_set, args):
     root = Path(args.coco_path)
+    print(root)
     assert root.exists(), f'provided Crowdhuman path {root} does not exist'
     mode = 'instances'
     PATHS = {
