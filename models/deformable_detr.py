@@ -107,7 +107,7 @@ class DeformableDETR(nn.Module):
 
     def forward(self, samples: NestedTensor):
         """ The forward expects a NestedTensor, which consists of:
-               - samples.tensor: batched images, of shape [batch_size x 3 x H x W]
+               - samples.tensors: batched images, of shape [batch_size x 3 x H x W]
                - samples.mask: a binary mask of shape [batch_size x H x W], containing 1 on padded pixels
             It returns a dict with the following elements:
                - "pred_logits": the classification logits (including no-object) for all queries.
@@ -118,11 +118,16 @@ class DeformableDETR(nn.Module):
                                See PostProcess for information on how to retrieve the unnormalized bounding box.
                - "aux_outputs": Optional, only returned when auxilary losses are activated. It is a list of
                                 dictionnaries containing the two above keys for each decoder layer.
+            The backbone has two components, 0 represents the forward layer, on the other hand, 1 represents positionalencodding.
         """
         if not isinstance(samples, NestedTensor):
             samples = nested_tensor_from_tensor_list(samples)
         
         features, pos = self.backbone(samples)
+        print('sample shape:', samples.tensors.shape)
+        print('feature:', features[0].tensors.shape)
+        print('features length:', len(features))
+        print('pos length:', len(pos))
 
         srcs = []
         masks = []
@@ -131,6 +136,10 @@ class DeformableDETR(nn.Module):
             srcs.append(self.input_proj[l](src))
             masks.append(mask)
             assert mask is not None
+            
+        print(src.shape)
+        print(self.backbone[1])
+
         if self.num_feature_levels > len(srcs):
             _len_srcs = len(srcs)
             for l in range(_len_srcs, self.num_feature_levels):
@@ -144,12 +153,22 @@ class DeformableDETR(nn.Module):
                 srcs.append(src)
                 masks.append(mask)
                 pos.append(pos_l)
-
+        
+        print('pos len:',len(pos))
+        print('pos shape:', pos[0].shape)
+        """ From the beginning until here, we have the input samples of 2 images as input. the two images are passed to 
+            backbone which has two component, one is neural network, the other is positional encoding.
+        
+        """
         query_embeds = None
         if not self.two_stage:
             query_embeds = self.query_embed.weight
+            
         hs, init_reference, inter_references, enc_outputs_class, enc_outputs_coord_unact = self.transformer(srcs, masks, pos, query_embeds)
-
+        """Don't underestimate this sentence. It returns the results of transformer!!!!!!!!!!
+        
+        """
+        
         outputs_classes = []
         outputs_coords = []
         for lvl in range(hs.shape[0]):
@@ -436,6 +455,19 @@ class MLP(nn.Module):
 
 
 def build(args):
+    """ The default args are:
+        --backbone: resnet50
+        --positional_embedding: sine
+        --number of feature level: 4
+        --enc_layer: 6
+        --dec_layer: 6 
+        --dim_forward: 1024
+        --hidden_layer: 256
+        --drop_out: 0.1
+        --nheads: 8
+        --nqueries: 300
+        
+    """
     num_classes = 20 if args.dataset_file != 'coco' else 91
     if args.dataset_file == "coco_panoptic":
         num_classes = 250
