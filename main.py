@@ -104,7 +104,11 @@ def get_args_parser():
     parser.add_argument('--focal_alpha', default=0.25, type=float)
 
     # dataset parameters
+<<<<<<< HEAD
     parser.add_argument('--dataset_file', default='coco')
+=======
+    parser.add_argument('--dataset_file', default='crowdhuman')
+>>>>>>> 24103c4836215bfe1cd6360f4bcc6fc08b65c0c8
     parser.add_argument('--coco_path', default='../dataset/crowdhuman', type=str)
     parser.add_argument('--coco_panoptic_path', type=str)
     parser.add_argument('--remove_difficult', action='store_true')
@@ -132,7 +136,6 @@ def main(args):
     # utils.init_distributed_mode(args)
     args.distributed = False
     print("git:\n  {}\n".format(utils.get_sha()))
-
     if args.frozen_weights is not None:
         assert args.masks, "Frozen training is meant for segmentation only"
     print(args)
@@ -147,6 +150,7 @@ def main(args):
 
     model, criterion, postprocessors = build_model(args)
     model.to(device)
+    print(model) # build up the model takes 606 mb
 
     model_without_ddp = model
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
