@@ -156,7 +156,7 @@ class DeformableDETR(nn.Module):
         
         print('pos len:',len(pos))
         print('pos shape:', pos[0].shape)
-        """ From the beginning until here, we have the input samples of 2 images as input. the two images are passed to 
+        """ From the beginning until here, we have the input samples of 2 images as input (2 because of the batch size). the two images are passed to 
             backbone which has two component, one is neural network, the other is positional encoding.
         
         """
@@ -168,7 +168,9 @@ class DeformableDETR(nn.Module):
         """Don't underestimate this sentence. It returns the results of transformer!!!!!!!!!!
         
         """
-        
+        print('hs shape:', hs.shape)
+        print('init_reference shape', init_reference.shape)
+        print('')
         outputs_classes = []
         outputs_coords = []
         for lvl in range(hs.shape[0]):

@@ -104,11 +104,11 @@ def get_args_parser():
     parser.add_argument('--focal_alpha', default=0.25, type=float)
 
     # dataset parameters
-<<<<<<< HEAD
-    parser.add_argument('--dataset_file', default='coco')
-=======
+
+    # parser.add_argument('--dataset_file', default='coco')
+
     parser.add_argument('--dataset_file', default='crowdhuman')
->>>>>>> 24103c4836215bfe1cd6360f4bcc6fc08b65c0c8
+
     parser.add_argument('--coco_path', default='../dataset/crowdhuman', type=str)
     parser.add_argument('--coco_panoptic_path', type=str)
     parser.add_argument('--remove_difficult', action='store_true')

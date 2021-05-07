@@ -85,6 +85,9 @@ class DeformableTransformer(nn.Module):
 
     def gen_encoder_output_proposals(self, memory, memory_padding_mask, spatial_shapes):
         N_, S_, C_ = memory.shape
+        print('memory shape:', memory.shape)
+        print('memory_padding_mask', memory_padding_mask.shape)
+        print('spatial_shapes', spatial_shapes)
         base_scale = 4.0
         proposals = []
         _cur = 0
@@ -103,6 +106,10 @@ class DeformableTransformer(nn.Module):
             proposal = torch.cat((grid, wh), -1).view(N_, -1, 4)
             proposals.append(proposal)
             _cur += (H_ * W_)
+        
+        print('proposal shape:', proposals[0].shape)
+        print('grid shape', grid)
+        print(grid)
         output_proposals = torch.cat(proposals, 1)
         output_proposals_valid = ((output_proposals > 0.01) & (output_proposals < 0.99)).all(-1, keepdim=True)
         output_proposals = torch.log(output_proposals / (1 - output_proposals))
@@ -113,6 +120,8 @@ class DeformableTransformer(nn.Module):
         output_memory = output_memory.masked_fill(memory_padding_mask.unsqueeze(-1), float(0))
         output_memory = output_memory.masked_fill(~output_proposals_valid, float(0))
         output_memory = self.enc_output_norm(self.enc_output(output_memory))
+        
+        
         return output_memory, output_proposals
 
     def get_valid_ratio(self, mask):
