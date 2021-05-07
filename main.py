@@ -23,6 +23,8 @@ from datasets import build_dataset, get_coco_api_from_dataset
 from engine import evaluate, train_one_epoch
 from models import build_model
 
+# to visualize the net archi
+
 
 def get_args_parser():
     parser = argparse.ArgumentParser('Deformable DETR Detector', add_help=False)
@@ -145,9 +147,10 @@ def main(args):
     random.seed(seed)
 
     model, criterion, postprocessors = build_model(args)
+    print(type(model))
     model.to(device)
     print(model) # build up the model takes 606 mb
-
+    
     model_without_ddp = model
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print('number of params:', n_parameters)
@@ -329,3 +332,8 @@ if __name__ == '__main__':
     if args.output_dir:
         Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     main(args)
+    
+    # x = torch.cuda.FloatTensor(1,3,244,244)
+    # input_names = ['Sentence']
+    # output_names = ['yhat']
+    #torch.onnx.export(model, x, 'rnn.onnx', input_names=input_names, output_names=output_names, opset_version=10)
