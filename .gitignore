@@ -58,6 +58,7 @@ _darcs
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+*_old.py
 *$py.class
 
 # C extensions

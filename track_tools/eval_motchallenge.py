@@ -66,6 +66,7 @@ def compare_dataframes(gts, ts):
 if __name__ == '__main__':
 
     args = parse_args()
+    print(args.eval_official)
 
     loglevel = getattr(logging, args.loglevel.upper(), None)
     if not isinstance(loglevel, int):

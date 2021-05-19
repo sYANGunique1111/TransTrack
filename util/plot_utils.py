@@ -49,9 +49,13 @@ def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col
     fig, axs = plt.subplots(ncols=len(fields), figsize=(16, 5))
 
     for df, color in zip(dfs, sns.color_palette(n_colors=len(logs))):
+        print(type(df))
         for j, field in enumerate(fields):
+            print(field)
             if field == 'mAP':
-                coco_eval = pd.DataFrame(pd.np.stack(df.test_coco_eval.dropna().values)[:, 1]).ewm(com=ewm_col).mean()
+                coco_eval_ = df.test_coco_eval_bbox.dropna().values
+                coco_eval = pd.DataFrame(pd.np.stack(coco_eval_)[:, 1]).ewm(com=ewm_col).mean()
+                # coco_eval = pd.DataFrame(pd.np.stack(df.test_coco_eval.dropna().values)[:, 1]).ewm(com=ewm_col).mean()
                 axs[j].plot(coco_eval, c=color)
             else:
                 df.interpolate().ewm(com=ewm_col).mean().plot(
@@ -61,9 +65,9 @@ def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col
                     style=['-', '--']
                 )
     for ax, field in zip(axs, fields):
-        ax.legend([Path(p).name for p in logs])
+        # ax.legend([Path(p).name for p in logs])
         ax.set_title(field)
-
+        
 
 def plot_precision_recall(files, naming_scheme='iter'):
     if naming_scheme == 'exp_id':
@@ -99,5 +103,10 @@ def plot_precision_recall(files, naming_scheme='iter'):
     return fig, axs
 
 if __name__ == '__main__':
-    path = ''
+    log_path = '../output'
+    file_dir = Path('../val/track')
+    p = Path(log_path)
+    plot_logs(p)
+    # fig, axs = plot_precision_recall(file_name)
+    plt.show()
 

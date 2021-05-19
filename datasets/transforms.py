@@ -221,6 +221,14 @@ class RandomSizeCrop(object):
         region = T.RandomCrop.get_params(img, [h, w])
         return crop(img, target, region)
 
+class SizeCrop_MOT(object):
+    def __init__(self, max_size: int):
+        self.max_size = max_size
+    def __call__(self, img: PIL.Image.Image, target: dict):
+        w =  min(img.width, self.max_size)
+        h =  min(img.height, self.max_size)
+        region = T.RandomCrop.get_params(img, [h, w])
+        return crop_mot(img, target, region)
 
 class RandomSizeCrop_MOT(object):
     def __init__(self, min_size: int, max_size: int):
@@ -255,6 +263,13 @@ class RandomHorizontalFlip(object):
             return hflip(img, target)
         return img, target
 
+class Resize(object):
+    def __init__(self, sizes):
+        assert isinstance(sizes, int)
+        self.sizes = sizes
+
+    def __call__(self, img, target=None):
+        return resize(img, target, self.sizes, None)
 
 class RandomResize(object):
     def __init__(self, sizes, max_size=None):
