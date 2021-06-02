@@ -3,6 +3,8 @@ models/modify
 mot
 crowdhuman
 coco
+eval
+trained_model
 output
 output*
 instant_test_output
@@ -187,4 +189,4 @@ dmypy.json
 .pyre/
 
 # nohup
-nohup.out
+*.out

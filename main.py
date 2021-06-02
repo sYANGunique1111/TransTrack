@@ -151,9 +151,7 @@ def main(args):
     random.seed(seed)
 
     model, criterion, postprocessors = build_model(args)
-    print(type(model))
-    model.to(device)
-    print(model) # build up the model takes 606 mb
+    model.to(device)  # build up the model takes 606 mb
     
     model_without_ddp = model
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)

@@ -73,9 +73,7 @@ class DeformableDETR(nn.Module):
                     nn.Conv2d(hidden_dim, in_channels, kernel_size=1),
                     nn.GroupNorm(num_group, in_channels),
                 ))
-                print('in channnel :', in_channels)
-                print('hidden layers :', hidden_dim)
-                
+
 
             for _ in range(num_feature_levels - num_backbone_outs):
                 input_proj_list.append(nn.Sequential(
@@ -93,9 +91,7 @@ class DeformableDETR(nn.Module):
             self.back_proj = nn.ModuleList(back_proj_list)
             print('in channnel :', in_channels)
             print('hidden layers :', hidden_dim)
-            print(input_proj_list)
-            print(back_proj_list)
-            print('')
+
         else:
             self.input_proj = nn.ModuleList([nn.Conv2d(backbone.num_channels[0], hidden_dim, kernel_size=1)])
         self.combine = nn.Conv2d(hidden_dim * 2, hidden_dim, kernel_size=1)
@@ -179,26 +175,44 @@ class DeformableDETR(nn.Module):
     def forward(self, samples_targets, unused_embed=None):
         
         if self.training:
+                
             samples, targets = samples_targets   
 
             pre_samples, pre_targets = self.randshift(samples, targets)
             prepre_samples, _ = self.randshift(samples, targets)
-            pre_out, pre_embed = self.forward_once(pre_samples, prepre_samples, pre_targets, targets)             
-            
-            if torch.randn(1).item() > 0.0:
-                out, srcs_, _ = self.forward_train(samples, pre_embed, self.pre_srcs_)     
-            else:
-                for key in pre_embed:
-                    if key != 'feat':
-                        pre_embed[key] = None
-                out, srcs_, _ = self.forward_train(samples, pre_embed, self.pre_srcs_)
-                pre_out = None
-                pre_targets = None
-        
-            self.pre_srcs_ = srcs_
+            pre_out, pre_embed = self.forward_once(pre_samples, prepre_samples, pre_targets, targets)
 
-                
-                
+            '''In case the number of last couple of samples in not enough for a batch'''
+            if self.pre_srcs_ is not None and samples.tensors.shape[0] != self.pre_srcs_[0].shape[0]:
+                input_feature = [src[:samples.tensors.shape[0]] for src in self.pre_srcs_]
+                out, srcs_, _ = self.forward_train(samples, pre_embed, input_feature)
+                self.pre_srcs_ = [torch.cat([src, pre_src[samples.tensors.shape[0]:]], dim=0) for src, pre_src in zip(srcs_, self.pre_srcs_)]
+            else:
+                if torch.randn(1).item() > 0.0:
+                    out, srcs_, _ = self.forward_train(samples, pre_embed, self.pre_srcs_)
+                else:
+                    for key in pre_embed:
+                        if key != 'feat':
+                            pre_embed[key] = None
+                    out, srcs_, _ = self.forward_train(samples, pre_embed, self.pre_srcs_)
+                    pre_out = None
+                    pre_targets = None
+
+                self.pre_srcs_ = srcs_
+            return out, pre_out, pre_targets
+        
+        else:
+            samples = samples_targets
+            '''In case the number of last couple of samples in not enough for a batch'''
+            if self.pre_srcs_ is not None and samples.tensors.shape[0] != self.pre_srcs_[0].shape[0]:
+                input_feature = [src[:samples.tensors.shape[0]] for src in self.pre_srcs_]
+                out, srcs_, _ = self.forward_train(samples, None, input_feature)
+                self.pre_srcs_ = [torch.cat([src, pre_src[samples.tensors.shape[0]:]], dim=0) for src, pre_src in zip(srcs_, self.pre_srcs_)]
+            else:
+                out, srcs_, _ = self.forward_train(samples, None, self.pre_srcs_)
+                self.pre_srcs_ = srcs_
+            return out, None
+    
             '''
             if torch.randn(1).item() > 0.0:
                 out, srcs_, _ = self.forward_train(samples, pre_embed)     
@@ -210,15 +224,6 @@ class DeformableDETR(nn.Module):
                 pre_out = None
                 pre_targets = None
             '''
-            
-            
-            return out, pre_out, pre_targets
-        
-        else:
-            samples = samples_targets
-            out, srcs_, _ = self.forward_train(samples)         
-            return out, None
-    
     @torch.no_grad()    
     def forward_once(self, samples: NestedTensor, train_samples: NestedTensor, targets=None, next_targets=None):
         if not isinstance(samples, NestedTensor):
@@ -231,7 +236,7 @@ class DeformableDETR(nn.Module):
         
         srcs = []
         masks = []
-        print('feature length :', len(features))
+
         
         for l, (feat, feat2) in enumerate(zip(features, pre_feat)):
             src, mask = feat.decompose()
@@ -311,10 +316,9 @@ class DeformableDETR(nn.Module):
         if not isinstance(samples, NestedTensor):
             samples = nested_tensor_from_tensor_list(samples)
         features, pos = self.backbone(samples)
-        
         srcs = []
         masks = []
-       
+        
         if pre_embed is not None:
             pre_reference, pre_tgt, pre_feat, pre_memory = pre_embed['reference'], pre_embed['tgt'], pre_embed['feat'], pre_embed['memory']
         else:
@@ -330,12 +334,11 @@ class DeformableDETR(nn.Module):
                 srcs.append(self.combine(torch.cat([self.input_proj[l](src), self.input_proj[l](src2)], dim=1)))
                 masks.append(mask)
                 assert mask is not None
-
         else:
             for l, (feat, pre_src) in enumerate(zip(features, pre_srcs)):
                 src, mask = feat.decompose()
-                pre_src = self.back_proj[l](pre_src)
-                srcs.append(self.combine(torch.cat([self.input_proj[l](src), self.input_proj[l](pre_src)], dim=1)))
+                src2 = self.back_proj[l](pre_src)
+                srcs.append(self.combine(torch.cat([self.input_proj[l](src), self.input_proj[l](src2)], dim=1)))
                 masks.append(mask)
                 assert mask is not None
             
@@ -353,27 +356,8 @@ class DeformableDETR(nn.Module):
                 masks.append(mask)
                 pos.append(pos_l)
 
-
                 
             
-                
-        '''
-        if self.num_feature_levels > len(srcs):
-            _len_srcs = len(srcs)
-            for l in range(_len_srcs, self.num_feature_levels):
-                if l == _len_srcs:
-                    pre_src = self.back_proj[l](pre_src)
-                    src = self.combine(torch.cat([self.input_proj[l](features[-1].tensors), self.input_proj[l](pre_feat[-1].tensors)], dim=1))
-                else:
-                    src = self.input_proj[l](srcs[-1])
-
-                m = samples.mask
-                mask = F.interpolate(m[None].float(), size=src.shape[-2:]).to(torch.bool)[0]
-                pos_l = self.backbone[1](NestedTensor(src, mask)).to(src.dtype)
-                srcs.append(src)
-                masks.append(mask)
-                pos.append(pos_l)
-        '''    
         query_embeds = None
         if not self.two_stage:
             query_embeds = self.query_embed.weight        

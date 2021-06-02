@@ -177,6 +177,7 @@ def make_coco_transforms(image_set):
             T.RandomResize([800], max_size=1333),
             normalize,
         ])
+
     if image_set == 'test':
         return T.Compose([
             T.RandomResize([800], max_size=1333),
@@ -195,16 +196,16 @@ def make_mot_transforms(image_set):
     ])
 
     scales = [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800]
+    scale = scales[1]
 
     if image_set == 'train':
         return T.Compose([
             
             T.RandomHorizontalFlip(),
             T.Compose([
-                    T.Resize(800),
-#                     T.RandomSizeCrop(384, 600),
+                    T.Resize(1000),
                     T.SizeCrop_MOT(1000),
-                    T.Resize(scales[1]),
+                    T.Resize(scale),
                 ]),
             normalize,
         ])
@@ -240,16 +241,44 @@ def make_mot_transforms(image_set):
             ),
             normalize,
         ])
+    
     if image_set == 'val':
-        return T.Compose([
+         return T.Compose([
+            T.RandomHorizontalFlip(),
+            T.Compose([
+                    T.Resize(1000),
+                    T.SizeCrop_MOT(1000),
+                    T.Resize(scale),
+                ]),
+            normalize,
+        ])
+         '''
+         return T.Compose([
             T.RandomResize([800], max_size=1333),
             normalize,
         ])
+         '''
+         
+
+         
     if image_set == 'test':
         return T.Compose([
             T.RandomResize([800], max_size=1333),
             normalize,
         ])
+        '''
+        return T.Compose([
+            T.RandomHorizontalFlip(),
+            T.Compose([
+                    T.Resize(1000),
+                    T.SizeCrop_MOT(1000),
+                    T.Resize(scale),
+                ]),
+            normalize,
+        ])
+        '''
+
+
     raise ValueError(f'unknown {image_set}')
 
 

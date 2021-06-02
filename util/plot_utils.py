@@ -103,9 +103,10 @@ def plot_precision_recall(files, naming_scheme='iter'):
     return fig, axs
 
 if __name__ == '__main__':
-    log_path = '../output'
+    log_path = ('../output', '../newtrack_crowdhu_output_1_1')
+    log_path2 = ('../output', '../newtrack_crowdhu_output')
     file_dir = Path('../val/track')
-    p = Path(log_path)
+    p = Path('../trained_model/crw_mot_1b10e')
     plot_logs(p)
     # fig, axs = plot_precision_recall(file_name)
     plt.show()

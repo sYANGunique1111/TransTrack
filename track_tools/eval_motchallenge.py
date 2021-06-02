@@ -12,6 +12,7 @@ import motmetrics as mm
 import pandas as pd
 from collections import OrderedDict
 from pathlib import Path
+from io import StringIO
 
 
 def parse_args():
@@ -116,6 +117,8 @@ if __name__ == '__main__':
     for k in change_fmt_list:
         fmt[k] = fmt['mota']
     print(mm.io.render_summary(summary, formatters=fmt, namemap=mm.io.motchallenge_metric_names))
+    print(type(mm.io.render_summary(summary, formatters=fmt, namemap=mm.io.motchallenge_metric_names)))
+   
     if args.eval_official:
         metrics = mm.metrics.motchallenge_metrics + ['num_objects']
         summary = mh.compute_many(accs, names=names, metrics=metrics, generate_overall=True)
