@@ -12,6 +12,11 @@ test
 visual_val_predict
 visual_val_gt
 
+crowdhuman_final/
+pty2onnx.py
+track_tools/convert_RoadDamage_to_coco.py
+
+
 *.avi
 *.png
 *.json
