@@ -2,7 +2,8 @@ import os
 import json
 import cv2
 import glob as gb
-from track_tools.colormap import colormap
+#from track_tools.colormap import colormap
+from colormap import colormap
 
 
 def txt2img(visual_path="visual_val_gt"):
@@ -15,8 +16,8 @@ def txt2img(visual_path="visual_val_gt"):
         os.makedirs(visual_path)
     color_list = colormap()
 
-    gt_json_path = 'mot/annotations/val_half.json'
-    img_path = 'mot/train/'
+    gt_json_path = '../dataset/MOT17/annotations/val_half.json'
+    img_path = '../dataset/MOT17/train/'
     show_video_names = ['MOT17-02-FRCNN', 
                     'MOT17-04-FRCNN',
                     'MOT17-05-FRCNN',
@@ -31,7 +32,7 @@ def txt2img(visual_path="visual_val_gt"):
         if visual_path == "visual_val_gt":
             txt_path = 'mot/train/' + show_video_name + '/gt/gt_val_half.txt'
         elif visual_path == "visual_val_predict":
-            txt_path = 'val/tracks/'+ show_video_name + '.txt'
+            txt_path = 'eval/val_origincode_crowdh_1_1/val/tracks/'+ show_video_name + '.txt'
         else:
             raise NotImplementedError
         
@@ -78,13 +79,13 @@ def txt2img(visual_path="visual_val_gt"):
     print("txt2img Done")
 
         
-def img2video(visual_path="visual_val_gt"):
+def img2video(visual_path="visual_val_gt", video_name="_video.avi"):
     print("Starting img2video")
 
     img_paths = gb.glob(visual_path + "/*.png") 
     fps = 16 
     size = (1920,1080) 
-    videowriter = cv2.VideoWriter(visual_path + "_video.avi",cv2.VideoWriter_fourcc('M','J','P','G'), fps, size)
+    videowriter = cv2.VideoWriter(visual_path + video_name,cv2.VideoWriter_fourcc('M','J','P','G'), fps, size)
 
     for img_path in sorted(img_paths):
         img = cv2.imread(img_path)
@@ -97,5 +98,6 @@ def img2video(visual_path="visual_val_gt"):
 
 if __name__ == '__main__':
     visual_path="visual_val_predict"
+    video_name ="_newmodel_1_1.avi"
     txt2img(visual_path)
-    img2video(visual_path)
+    img2video(visual_path, video_name)

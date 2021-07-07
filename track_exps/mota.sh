@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 
-GROUNDTRUTH=mot/train
-RESULTS=val/tracks
+GROUNDTRUTH=../dataset/MOT17/train
+RESULTS=eval/val_origincode_model/val/tracks
 GT_TYPE=_val_half
 THRESHOLD=-1
 

@@ -3,6 +3,8 @@ models/modify
 mot
 crowdhuman
 coco
+eval
+trained_model
 output
 output*
 instant_test_output
@@ -63,6 +65,7 @@ _darcs
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+*_old.py
 *$py.class
 
 # C extensions
@@ -191,4 +194,4 @@ dmypy.json
 .pyre/
 
 # nohup
-nohup.out
+*.out

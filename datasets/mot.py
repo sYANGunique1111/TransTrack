@@ -5,7 +5,6 @@
 # ------------------------------------------------------------------------
 """
 COCO dataset which returns image_id for evaluation.
-
 Mostly copy-paste from https://github.com/pytorch/vision/blob/13b35ff/references/detection/coco_utils.py
 """
 from pathlib import Path
@@ -167,8 +166,7 @@ def make_coco_transforms(image_set):
                 T.RandomResize(scales, max_size=1333),
                 T.Compose([
                     T.RandomResize([400, 500, 600]),
-#                     T.RandomSizeCrop(384, 600),
-                    T.RandomSizeCrop_MOT(384, 600),
+                    T.RandomSizeCrop(384, 600),
                     T.RandomResize(scales, max_size=1333),
                 ])
             ),
@@ -179,6 +177,7 @@ def make_coco_transforms(image_set):
             T.RandomResize([800], max_size=1333),
             normalize,
         ])
+
     if image_set == 'test':
         return T.Compose([
             T.RandomResize([800], max_size=1333),
@@ -187,6 +186,8 @@ def make_coco_transforms(image_set):
     raise ValueError(f'unknown {image_set}')
 
     
+    
+    
 def make_mot_transforms(image_set):
 
     normalize = T.Compose([
@@ -194,35 +195,93 @@ def make_mot_transforms(image_set):
         T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
 
-#     scales = [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800]
-    scales = [480, 512, 544]
+    scales = [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800]
+    scale = scales[1]
 
     if image_set == 'train':
         return T.Compose([
+            
+            T.RandomHorizontalFlip(),
+            T.Compose([
+                    T.Resize(1000),
+                    T.SizeCrop_MOT(1000),
+                    T.Resize(scale),
+                ]),
+            normalize,
+        ])
+
+        '''
+        return T.Compose([
+            
             T.RandomHorizontalFlip(),
             T.RandomSelect(
-                T.RandomResize(scales, max_size=960),
+                T.RandomResize(scales, max_size=1333),
                 T.Compose([
-                    T.RandomResize([400, 500, 600]),
+                    T.RandomResize([800, 1000, 1200]),
 #                     T.RandomSizeCrop(384, 600),
-                    T.RandomSizeCrop_MOT(384, 600),
-                    T.RandomResize(scales, max_size=960),
+                    T.RandomSizeCrop_MOT(800, 1200),
+                    T.RandomResize(scales, max_size=1333),
+                ])
+            ),
+            
+            normalize,
+        ])
+        '''    
+    if image_set == 'trainall':
+        return T.Compose([
+            T.RandomHorizontalFlip(),
+            T.RandomSelect(
+                T.RandomResize(scales, max_size=1333),
+                T.Compose([
+                    T.RandomResize([800, 1000, 1200]),
+#                     T.RandomSizeCrop(384, 600),
+                    T.RandomSizeCrop_MOT(800, 1200),
+                    T.RandomResize(scales, max_size=1333),
                 ])
             ),
             normalize,
         ])
-
+    
     if image_set == 'val':
-        return T.Compose([
-            T.RandomResize([540], max_size=960),
+         return T.Compose([
+            T.RandomHorizontalFlip(),
+            T.Compose([
+                    T.Resize(1000),
+                    T.SizeCrop_MOT(1000),
+                    T.Resize(scale),
+                ]),
             normalize,
         ])
+         '''
+         return T.Compose([
+            T.RandomResize([800], max_size=1333),
+            normalize,
+        ])
+         '''
+         
+
+         
     if image_set == 'test':
         return T.Compose([
-            T.RandomResize([540], max_size=960),
+            T.RandomResize([800], max_size=1333),
             normalize,
         ])
+        '''
+        return T.Compose([
+            T.RandomHorizontalFlip(),
+            T.Compose([
+                    T.Resize(1000),
+                    T.SizeCrop_MOT(1000),
+                    T.Resize(scale),
+                ]),
+            normalize,
+        ])
+        '''
+
+
     raise ValueError(f'unknown {image_set}')
+
+
 
     
 def build(image_set, args):
@@ -238,6 +297,7 @@ def build(image_set, args):
     }
 
     img_folder, ann_file = PATHS[image_set]
-    dataset = CocoDetection(img_folder, ann_file, transforms=make_coco_transforms(image_set), return_masks=args.masks,
+    transforms=make_mot_transforms(image_set)
+    dataset = CocoDetection(img_folder, ann_file, transforms, return_masks=args.masks,
                             cache_mode=args.cache_mode, local_rank=get_local_rank(), local_size=get_local_size())
     return dataset

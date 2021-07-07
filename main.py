@@ -33,7 +33,7 @@ def get_args_parser():
     parser.add_argument('--lr_backbone', default=2e-5, type=float)
     parser.add_argument('--lr_linear_proj_names', default=['reference_points', 'sampling_offsets'], type=str, nargs='+')
     parser.add_argument('--lr_linear_proj_mult', default=0.1, type=float)
-    parser.add_argument('--batch_size', default=2, type=int)
+    parser.add_argument('--batch_size', default=1, type=int)
     parser.add_argument('--weight_decay', default=1e-4, type=float)
     parser.add_argument('--epochs', default=50, type=int)
     parser.add_argument('--lr_drop', default=40, type=int)
@@ -106,7 +106,11 @@ def get_args_parser():
     parser.add_argument('--focal_alpha', default=0.25, type=float)
 
     # dataset parameters
+
+    # parser.add_argument('--dataset_file', default='coco')
+
     parser.add_argument('--dataset_file', default='crowdhuman')
+
     parser.add_argument('--coco_path', default='../dataset/crowdhuman', type=str)
     parser.add_argument('--coco_panoptic_path', type=str)
     parser.add_argument('--remove_difficult', action='store_true')
@@ -147,9 +151,7 @@ def main(args):
     random.seed(seed)
 
     model, criterion, postprocessors = build_model(args)
-    print(type(model))
-    model.to(device)
-    print(model) # build up the model takes 606 mb
+    model.to(device)  # build up the model takes 606 mb
     
     model_without_ddp = model
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
