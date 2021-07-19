@@ -182,7 +182,7 @@ class DeformableDETR(nn.Module):
             prepre_samples, _ = self.randshift(samples, targets)
             pre_out, pre_embed = self.forward_once(pre_samples, prepre_samples, pre_targets, targets)
 
-            '''In case the number of last couple of samples in not enough for a batch'''
+            '''In case the number of last couple of samples is not enough for a batch'''
             if self.pre_srcs_ is not None and samples.tensors.shape[0] != self.pre_srcs_[0].shape[0]:
                 input_feature = [src[:samples.tensors.shape[0]] for src in self.pre_srcs_]
                 out, srcs_, _ = self.forward_train(samples, pre_embed, input_feature)
@@ -203,7 +203,7 @@ class DeformableDETR(nn.Module):
         
         else:
             samples = samples_targets
-            '''In case the number of last couple of samples in not enough for a batch'''
+            '''In case the number of last couple of samples is not enough for a batch'''
             if self.pre_srcs_ is not None and samples.tensors.shape[0] != self.pre_srcs_[0].shape[0]:
                 input_feature = [src[:samples.tensors.shape[0]] for src in self.pre_srcs_]
                 out, srcs_, _ = self.forward_train(samples, None, input_feature)
@@ -354,9 +354,7 @@ class DeformableDETR(nn.Module):
                 pos_l = self.backbone[1](NestedTensor(src, mask)).to(src.dtype)
                 srcs.append(src)
                 masks.append(mask)
-                pos.append(pos_l)
-
-                
+                pos.append(pos_l)              
             
         query_embeds = None
         if not self.two_stage:

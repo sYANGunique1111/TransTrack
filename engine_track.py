@@ -63,7 +63,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
         
         optimizer.zero_grad()
         losses.backward()
-#        losses.backward(retain_graph=True)
+
         if max_norm > 0:
             grad_total_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
         else:
@@ -146,7 +146,7 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
         if 'segm' in postprocessors.keys():
             target_sizes = torch.stack([t["size"] for t in targets], dim=0)
             results = postprocessors['segm'](results, outputs, orig_target_sizes, target_sizes)
-        res = {target['image_id'].item(): output for target, output in zip(targets, results)}
+        res = {target['image_id'].item(): output for target, output in zip(targets, results)} # T
 
         # post process for track.
         if tracker is not None:
