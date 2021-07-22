@@ -2,7 +2,7 @@
 
 
 GROUNDTRUTH=../dataset/MOT17/train
-RESULTS=eval/val_origincode_model/val/tracks
+RESULTS=eval/val_crw_mot_1b10e/val/tracks
 GT_TYPE=_val_half
 THRESHOLD=-1
 

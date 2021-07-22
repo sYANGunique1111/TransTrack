@@ -158,7 +158,7 @@ def main(args):
     np.random.seed(seed)
     random.seed(seed)
     
-    args.eval = True
+
     if args.det_val:
         assert args.eval, 'only support eval mode of detector for track'
         model, criterion, postprocessors = build_model(args)
