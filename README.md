@@ -13,8 +13,8 @@
 #### Steps
 1. Install and build libs
 ```
-git clone https://github.com/sYANGunique1111/transtrack_kitti.git
-cd transtrack_kitti
+git clone https://github.com/sYANGunique1111/TransTrack.git
+cd TransTrack
 cd models/ops
 python setup.py build install
 cd ../..
@@ -23,7 +23,9 @@ pip install -r requirements.txt
 
 2. Prepare datasets and annotations
 ```
-mkdir ../dataset/kitti
-cp -r /path_to_kitti_dataset/train kitti/train
-cp -r /path_to_kitti_dataset/test kitti/test
+mkdir ../dataset/MOT
+cp -r /path_to_mot_dataset/train mot/train
+cp -r /path_to_mot_dataset/test mot/test
 ```
+#### Note
+This repository is a modified version on [TransTrack](https://github.com/PeizeSun/TransTrack) model. Please refer to TransTrack repository to get more installation details. This work modified the backbone but didn't change the way they set up data-set. In order to fix data-set directory for all models, the data-set folder is created outside the TransTrack folder, Please bear that point. 
